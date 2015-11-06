@@ -19,7 +19,7 @@ def _interleave(msg, args):
 	""" Returns a list from a template string and arguments.
 		
 		>>> a, b, c = 'a', 'b', 'c'
-		>>> _interleave("This is my log %s: %s, %s", (a, b, c)) 
+		>>> _interleave("This is my log %s: %s, %s", (a, b, c))
 		... ["this is my log ", "a", ": ", "b", ", ", "c"]
 		
 	:param msg: string template
@@ -126,7 +126,7 @@ class BrowserLoggingMiddleware(object):
 	"""
 	request_header = 'HTTP_X_BROWSERLOGGINGAUTH'
 	
-	def __init__(self, application, logger_name=None, request_password=None):
+	def __init__(self, application, logger_name=None):
 		
 		self.application = application
 		self.handler = BrowserLoggingHandler()
@@ -137,20 +137,7 @@ class BrowserLoggingMiddleware(object):
 			logger = logging.getLogger()
 		logger.addHandler(self.handler)
 	
-	def check_request(self, environ):
-		"""Check the request to decide wether to send the header down the wires.
-			It requires a request header with the password
-		
-		:param environ:
-		:return:
-		"""
-		actual_request_password = environ.get(self.request_header)
-		return actual_request_password and actual_request_password == self.request_password
-	
 	def __call__(self, environ, start_response):
-		if not self.check_request(environ):
-			return self.application(environ, start_response)
-		
 		fsr = FakeStartResponse()
 		output = self.application(environ, fsr)
 		headers = fsr.headers + self.handler.flush_headers()
